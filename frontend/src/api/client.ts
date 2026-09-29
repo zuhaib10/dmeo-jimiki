@@ -93,7 +93,7 @@ export const api = {
     return request<{ items: AuditEvent[] }>(`/api/audit?${sp}`);
   },
   settings: () =>
-    request<{ items: SettingItem[]; openai_api_key: string; paths: Record<string, string> }>("/api/settings"),
+    request<{ items: SettingItem[]; openai_api_key: string; replicate_api_token: string; paths: Record<string, string> }>("/api/settings"),
   saveSettings: (values: Record<string, unknown>) =>
     request<{ items: SettingItem[] }>("/api/settings", { method: "PUT", body: JSON.stringify({ values }) }),
   pause: () => post("/api/system/pause"),

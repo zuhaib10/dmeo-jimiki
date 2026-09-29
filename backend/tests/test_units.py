@@ -72,3 +72,49 @@ def test_settings_api_hides_key(env):
         assert r.status_code == 200
         assert settings.MAX_RETRIES == 5
         assert client.put("/api/settings", json={"values": {"WORKFLOW_MODE": "bogus"}}).status_code == 400
+
+
+def test_replicate_aspect_ratio_and_single_input(tmp_path, monkeypatch):
+    from app.services import image_generator
+    from app.services.ai_provider import GenerationResult, ReplicateImageProvider
+    from app.services.image_grouping import ImageRecord
+
+    provider = ReplicateImageProvider.__new__(ReplicateImageProvider)  # skip client construction
+    assert provider.generation_size(1080, 1920) == "9:16"
+    assert provider.generation_size(1600, 1200) == "4:3"
+
+    sent: list[list[str]] = []
+
+    class OneImage:
+        name, model, max_input_images = "fake", "fake", 1
+
+        def generation_size(self, w, h):
+            return "1:1"
+
+        def generate(self, prompt, images, size):
+            sent.append([n for n, _, _ in images])
+            return GenerationResult(b"x")
+
+    monkeypatch.setattr(image_generator, "encode_for_upload", lambda p: (p.name, b"", "image/jpeg"))
+    recs = [ImageRecord(key=i, path=tmp_path / f"p{i}.jpg", file_hash=str(i), features={"sharpness": i})
+            for i in range(3)]
+    refs = [tmp_path / "ref.jpg"]
+    image_generator.run_generation(OneImage(), "model", None, recs, refs, 1400, 1600)
+    assert sent == [["p2.jpg"]]  # sharpest product photo only, no references
+
+
+def test_image_provider_selection(monkeypatch):
+    from app.services import ai_provider
+    ai_provider.clear_overrides()
+    monkeypatch.delenv("REPLICATE_API_TOKEN", raising=False)
+    settings.update_override("IMAGE_PROVIDER", "replicate")
+    try:
+        assert ai_provider.get_image_provider() is None
+        assert not settings.generation_enabled
+        assert settings.dry_run_reason == "REPLICATE_API_TOKEN is not configured"
+        monkeypatch.setenv("REPLICATE_API_TOKEN", "r8_test-not-real")
+        p = ai_provider.get_image_provider()
+        assert p.name == "replicate" and p.model == "xai/grok-imagine-image"
+        assert settings.generation_enabled
+    finally:
+        settings.update_override("IMAGE_PROVIDER", "openai")

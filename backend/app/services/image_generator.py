@@ -93,8 +93,11 @@ def build_prompt(image_type: str, analysis: ProductAnalysis | None, n_product: i
 def run_generation(provider: ImageProvider, image_type: str, analysis: ProductAnalysis | None,
                    sources: list[ImageRecord], references: list[Path], width: int, height: int
                    ) -> tuple[GenerationResult, PromptBundle, list[str]]:
-    chosen = select_source_images(sources)
+    limit = getattr(provider, "max_input_images", None)
+    chosen = select_source_images(sources, min(MAX_PRODUCT_INPUTS, limit or MAX_PRODUCT_INPUTS))
     refs = references if image_type in (ImageType.MODEL, ImageType.CLOSEUP) else []
+    if limit is not None:
+        refs = refs[:max(0, limit - len(chosen))]
     prompt = build_prompt(image_type, analysis, len(chosen), len(refs), width, height)
     inputs: list[tuple[str, bytes, str]] = [encode_for_upload(r.path) for r in chosen]
     inputs += [encode_for_upload(p) for p in refs]

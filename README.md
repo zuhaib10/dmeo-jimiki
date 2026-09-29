@@ -22,9 +22,14 @@ Requirements: Python 3.11+ and Node.js 20+.
 
 ```bat
 setup.bat          :: creates backend\.venv, installs deps, builds the dashboard, creates backend\.env
-notepad backend\.env   :: set OPENAI_API_KEY (and JIMIKI_ROOT if different)
+notepad backend\.env   :: set OPENAI_API_KEY and/or REPLICATE_API_TOKEN (and JIMIKI_ROOT if different)
 run.bat            :: starts http://127.0.0.1:8000 and opens the browser
 ```
+
+Image generation uses OpenAI by default. Set `IMAGE_PROVIDER=replicate` (or change it on the Settings page) to use
+Replicate's `xai/grok-imagine-image` (~$0.02/image) with `REPLICATE_API_TOKEN`. That model edits a single input image, so
+only the sharpest product photo is sent and model reference photos are not used. Product analysis and integrity
+checks still use OpenAI when `OPENAI_API_KEY` is set.
 
 Missing folders under `JIMIKI_ROOT` are created automatically:
 
@@ -76,7 +81,7 @@ Progress is derived from completed stages, never from timers.
 
 ## Dry run
 
-- **No `OPENAI_API_KEY`, or `WORKFLOW_MODE=dry_run`:** products are ingested, grouped, analysed, numbered, named and queued. The UI shows **DRY RUN — IMAGE GENERATION DISABLED**. No images are generated and no files move. Switching to live later picks up the queued products.
+- **No key for the selected image provider (`OPENAI_API_KEY` / `REPLICATE_API_TOKEN`), or `WORKFLOW_MODE=dry_run`:** products are ingested, grouped, analysed, numbered, named and queued. The UI shows **DRY RUN — IMAGE GENERATION DISABLED**. No images are generated and no files move. Switching to live later picks up the queued products.
 - **Run Dry Scan (Overview page):** previews how everything currently in `raw images` would be processed, including groups, proposed numbers, names and model references. It creates nothing, consumes no numbers and moves nothing.
 
 ## Live demo script

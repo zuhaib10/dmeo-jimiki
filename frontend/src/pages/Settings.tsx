@@ -10,7 +10,7 @@ const GROUPS: [string, string[]][] = [
   ["Workflow", ["WORKFLOW_MODE", "JIMIKI_ROOT", "MAX_RETRIES", "RETRY_BASE_DELAY", "LOG_LEVEL"]],
   ["Output", ["IMAGE_WIDTH", "IMAGE_HEIGHT", "WEBP_QUALITY"]],
   ["Grouping & validation", ["SIMILARITY_THRESHOLD", "GROUPING_CONFIDENCE_THRESHOLD", "ENABLE_PRODUCT_SIMILARITY_CHECK", "FILE_STABLE_SECONDS", "BATCH_SETTLE_SECONDS"]],
-  ["AI provider", ["ANALYSIS_MODEL", "IMAGE_MODEL", "IMAGE_QUALITY"]],
+  ["AI provider", ["ANALYSIS_MODEL", "IMAGE_PROVIDER", "IMAGE_MODEL", "IMAGE_QUALITY", "REPLICATE_IMAGE_MODEL"]],
   ["Interface", ["OPERATOR_NAME"]],
 ];
 
@@ -62,6 +62,14 @@ export default function Settings() {
         <div className="flex items-center justify-between px-5 pb-5 text-[13px]">
           <span className="flex items-center gap-2 text-cream"><Dot ok={data.openai_api_key === "Configured"} />{data.openai_api_key}</span>
           <span className="text-xs text-muted">Read from <span className="font-mono">backend/.env</span> (OPENAI_API_KEY). The key is never displayed.</span>
+        </div>
+      </Card>
+
+      <Card className="mb-5">
+        <CardHeader title={<span className="flex items-center gap-2"><KeyRound className="size-4 text-gold" /> Replicate API token</span>} />
+        <div className="flex items-center justify-between px-5 pb-5 text-[13px]">
+          <span className="flex items-center gap-2 text-cream"><Dot ok={data.replicate_api_token === "Configured"} />{data.replicate_api_token}</span>
+          <span className="text-xs text-muted">Read from <span className="font-mono">backend/.env</span> (REPLICATE_API_TOKEN). Needed when the image provider is replicate.</span>
         </div>
       </Card>
 

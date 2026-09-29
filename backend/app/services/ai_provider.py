@@ -4,8 +4,10 @@ All vendor-specific code lives here so another provider can be added by
 implementing ``VisionProvider`` / ``ImageProvider``. The rest of the
 application only talks to these protocols.
 
-When OPENAI_API_KEY is missing, ``get_vision()`` / ``get_image_provider()``
-return ``None`` and callers fall back to deterministic behaviour. Nothing in
+When OPENAI_API_KEY is missing, ``get_vision()`` returns ``None``; when the
+selected image provider's credential (OPENAI_API_KEY or REPLICATE_API_TOKEN)
+is missing, ``get_image_provider()`` returns ``None``. Callers then fall back
+to deterministic behaviour. Nothing in
 this module fabricates results.
 """
 from __future__ import annotations
@@ -102,6 +104,8 @@ class VisionProvider(Protocol):
 
 
 class ImageProvider(Protocol):
+    """Providers may also set ``max_input_images`` (int) when they accept fewer inputs than we'd send."""
+
     name: str
     model: str
 
@@ -313,6 +317,82 @@ class OpenAIImageProvider:
 
 
 # ---------------------------------------------------------------------------
+# Replicate implementation
+# ---------------------------------------------------------------------------
+REPLICATE_ASPECT_RATIOS = ("1:1", "16:9", "9:16", "4:3", "3:4", "3:2", "2:3", "2:1", "1:2",
+                           "19.5:9", "9:19.5", "20:9", "9:20")
+
+
+def _classify_replicate_error(exc: Exception) -> ProviderError:
+    import httpx
+    from replicate.exceptions import ModelError, ReplicateError
+
+    if isinstance(exc, ModelError):
+        pred = getattr(exc, "prediction", None)
+        meta = {"error_type": "ModelError", "prediction_id": getattr(pred, "id", None)}
+        return ProviderError(_short(f"Replicate prediction failed: {exc}"), False, meta)
+    if isinstance(exc, ReplicateError):
+        status = getattr(exc, "status", None)
+        meta = {"status_code": status, "error_type": type(exc).__name__}
+        return ProviderError(_short(str(exc)), status is not None and (status == 429 or status >= 500), meta)
+    if isinstance(exc, (httpx.TransportError, httpx.TimeoutException)):
+        return ProviderError(_short(str(exc) or type(exc).__name__), True, {"error_type": type(exc).__name__})
+    return ProviderError(_short(str(exc)), False, {"error_type": type(exc).__name__})
+
+
+class ReplicateImageProvider:
+    """Replicate image-edit models that take one ``image`` + ``prompt`` (e.g. xai/grok-imagine-image)."""
+
+    name = "replicate"
+    # The model edits a single input image, so only the sharpest product photo is sent.
+    max_input_images = 1
+
+    def __init__(self, model: str) -> None:
+        import replicate
+        self.model = model
+        self.client = replicate.Client(timeout=300)
+
+    def generation_size(self, width: int, height: int) -> str:
+        # Only used for text-to-image; the model keeps the input image's framing when editing.
+        target = width / height
+
+        def ratio(r: str) -> float:
+            a, b = r.split(":")
+            return float(a) / float(b)
+        return min(REPLICATE_ASPECT_RATIOS, key=lambda r: abs(ratio(r) - target))
+
+    def generate(self, prompt: str, images: list[tuple[str, bytes, str]], size: str) -> GenerationResult:
+        model_input: dict[str, Any] = {"prompt": prompt, "aspect_ratio": size}
+        if images:
+            # Sent inline: Replicate file-upload URLs have no extension, which grok-imagine rejects.
+            _filename, data, mime = images[0]
+            model_input["image"] = f"data:{mime};base64," + base64.b64encode(data).decode()
+        started = time.time()
+        try:
+            output = self.client.run(self.model, input=model_input)
+            if isinstance(output, list):
+                output = output[0] if output else None
+            if output is None:
+                raise ProviderError("Replicate returned no image", transient=True)
+            raw = output.read()
+        except ProviderError:
+            raise
+        except Exception as exc:  # noqa: BLE001
+            raise _classify_replicate_error(exc) from exc
+        # Normalise to PNG so raw attempts match the OpenAI provider's output format.
+        with Image.open(io.BytesIO(raw)) as im:
+            returned_size = f"{im.width}x{im.height}"
+            buf = io.BytesIO()
+            im.convert("RGB").save(buf, "PNG")
+        meta = {
+            "provider": self.name, "model": self.model, "aspect_ratio": size,
+            "duration_s": round(time.time() - started, 2), "output_url": str(getattr(output, "url", "")) or None,
+            "returned_size": returned_size,
+        }
+        return GenerationResult(buf.getvalue(), meta)
+
+
+# ---------------------------------------------------------------------------
 # Factory (tests can inject fakes)
 # ---------------------------------------------------------------------------
 _overrides: dict[str, Any] = {}
@@ -340,6 +420,10 @@ def get_vision() -> VisionProvider | None:
 def get_image_provider() -> ImageProvider | None:
     if "image" in _overrides:
         return _overrides["image"]
+    if settings.IMAGE_PROVIDER == "replicate":
+        if not os.environ.get("REPLICATE_API_TOKEN"):
+            return None
+        return ReplicateImageProvider(settings.REPLICATE_IMAGE_MODEL)
     if not os.environ.get("OPENAI_API_KEY"):
         return None
     return OpenAIImageProvider(settings.IMAGE_MODEL, settings.IMAGE_QUALITY)

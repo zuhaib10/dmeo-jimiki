@@ -10,5 +10,6 @@ pillow-heif==1.8.0
 opencv-python-headless==5.0.0.93
 numpy==2.5.3
 openai==3.20.0
+replicate==1.0.7
 httpx==0.28.1
 pytest==9.1.1

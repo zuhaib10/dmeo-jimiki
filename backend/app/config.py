@@ -5,8 +5,9 @@ Precedence (highest first):
 2. Environment / ``backend/.env``
 3. Built-in defaults below
 
-``OPENAI_API_KEY`` is only ever read from the environment and is never
-returned by the API — only its configured / not-configured status.
+``OPENAI_API_KEY`` and ``REPLICATE_API_TOKEN`` are only ever read from the
+environment and are never returned by the API — only their configured /
+not-configured status.
 """
 from __future__ import annotations
 
@@ -76,7 +77,12 @@ SPECS: dict[str, SettingSpec] = {
         SettingSpec("BATCH_SETTLE_SECONDS", 8.0, float, "Batch settle seconds",
                     "Wait this long after the last new file before grouping the batch.", kind="number"),
         SettingSpec("ANALYSIS_MODEL", "gpt-5.5", str, "Analysis model", "OpenAI model for vision analysis."),
+        SettingSpec("IMAGE_PROVIDER", "openai", str, "Image provider",
+                    "openai = gpt-image edits with all product + reference photos; replicate = Replicate model "
+                    "(edits the single sharpest product photo).", choices=("openai", "replicate"), kind="select"),
         SettingSpec("IMAGE_MODEL", "gpt-image-2", str, "Image model", "OpenAI model for image generation."),
+        SettingSpec("REPLICATE_IMAGE_MODEL", "xai/grok-imagine-image", str, "Replicate image model",
+                    "Replicate model used when the image provider is 'replicate'."),
         SettingSpec("IMAGE_QUALITY", "high", str, "Image quality", "Generation quality.",
                     choices=("low", "medium", "high"), kind="select"),
         SettingSpec("WEBP_QUALITY", 90, int, "WebP quality", "Quality of ecommerce WebP exports (1-100).", kind="number"),
@@ -128,15 +134,26 @@ class Settings:
         return bool(os.environ.get("OPENAI_API_KEY", "").strip())
 
     @property
+    def replicate_configured(self) -> bool:
+        return bool(os.environ.get("REPLICATE_API_TOKEN", "").strip())
+
+    @property
+    def image_provider_configured(self) -> bool:
+        if self.get("IMAGE_PROVIDER") == "replicate":
+            return self.replicate_configured
+        return self.openai_configured
+
+    @property
     def generation_enabled(self) -> bool:
-        return self.get("WORKFLOW_MODE") == "live" and self.openai_configured
+        return self.get("WORKFLOW_MODE") == "live" and self.image_provider_configured
 
     @property
     def dry_run_reason(self) -> str | None:
         if self.get("WORKFLOW_MODE") != "live":
             return "Workflow mode is set to DRY RUN"
-        if not self.openai_configured:
-            return "OPENAI_API_KEY is not configured"
+        if not self.image_provider_configured:
+            key = "REPLICATE_API_TOKEN" if self.get("IMAGE_PROVIDER") == "replicate" else "OPENAI_API_KEY"
+            return f"{key} is not configured"
         return None
 
     @property

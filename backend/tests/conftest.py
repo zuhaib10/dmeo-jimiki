@@ -15,6 +15,7 @@ _TMP = tempfile.mkdtemp(prefix="jimiki-tests-")
 os.environ["JIMIKI_DATA_DIR"] = os.path.join(_TMP, "data")
 os.environ["JIMIKI_LOG_DIR"] = os.path.join(_TMP, "logs")
 os.environ["OPENAI_API_KEY"] = "test-key-not-real"   # enables live mode; real API is never called (fakes injected)
+os.environ["IMAGE_PROVIDER"] = "openai"               # ignore the provider chosen in backend/.env
 os.environ["JIMIKI_DISABLE_WORKERS"] = "1"
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 

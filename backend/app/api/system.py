@@ -165,6 +165,7 @@ def get_settings() -> dict:
                       "default": spec.cast(spec.default), "source": settings.source_of(key), "kind": spec.kind,
                       "choices": list(spec.choices) if spec.choices else None, "editable": spec.editable})
     return {"items": items, "openai_api_key": "Configured" if settings.openai_configured else "Not Configured",
+            "replicate_api_token": "Configured" if settings.replicate_configured else "Not Configured",
             "paths": {"root": str(settings.root), "raw": str(settings.raw_dir), "completed": str(settings.completed_dir),
                       "reference": str(settings.reference_dir), "output": str(settings.output_dir)}}
 
