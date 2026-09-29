@@ -1,0 +1,21 @@
+version: 2026-09-29.2
+---
+Create a close-up detail photograph of a model wearing the EXACT jewellery/accessory product shown in the PRODUCT photographs, for an ecommerce product page.
+
+Input images: the first {product_image_count} image(s) are PRODUCT photographs — the only source of truth for the product. The remaining {reference_image_count} image(s) are MODEL REFERENCE photographs — use them ONLY for the model's appearance, skin, hair, styling and lighting. Ignore and do NOT copy any jewellery or accessories visible in the reference photographs.
+
+The product photographs show the item mounted on a JIMIKI retail display card (white card with the JIMIKI logo, 'Shop at jimiki.in' text, hang hole) and sometimes resting on a stone prop. The card, its printing, stitching/ties that hold the product to the card, and all props are NOT part of the product — never show them.
+
+THE PRODUCT MUST NOT CHANGE: same design, shape, proportions, colours, finish, stones and their arrangement/count, pearls/beads, hanging elements and every component. Show only details that exist in the product photographs — never invent engravings, stones, textures or construction. Do not redesign, recolour, reshape, beautify, simplify, replace or reinterpret the product.
+
+Product: {product_type}
+Visible details to preserve: {details}
+Integrity requirements: {integrity_notes}
+Placement: {placement}
+
+Photography requirements:
+- Portrait composition ({aspect}).
+- Tight macro/detail framing: the product fills a large part of the frame and is in sharp focus, emphasising texture, material, stones, construction and how it attaches/sits — while keeping enough of the model (skin, ear, neck, wrist or hair) for clear human context. This is not a standalone product shot.
+- Soft, natural editorial lighting with realistic reflections; shallow depth of field on the background.
+- The model wears ONLY this product — no other jewellery or accessories.
+- No text, no logo, no watermark.

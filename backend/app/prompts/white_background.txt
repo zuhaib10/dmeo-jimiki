@@ -1,0 +1,19 @@
+version: 2026-09-29.2
+---
+Create a professional ecommerce product photograph of the EXACT jewellery product shown in the provided photographs.
+
+The product photographs show the item mounted on a JIMIKI retail display card (white card with the JIMIKI logo, 'Shop at jimiki.in' text, hang hole) and sometimes resting on a stone prop. The card, its printing, stitching/ties that hold the product to the card, and all props are NOT part of the product — never show them.
+
+THE PRODUCT IS THE SOURCE OF TRUTH. Reproduce it exactly: same design, same shape, same proportions, same colours, same metal finish, same stones in the same arrangement and count, same pearls/beads, same hanging elements and the same number of every component. Do not redesign, recolour, reshape, beautify, simplify, replace or reinterpret the product. Do not add or remove stones or components.
+
+Product: {product_type}
+Visible details to preserve: {details}
+Integrity requirements: {integrity_notes}
+
+Photography requirements:
+- Pure white seamless background (#FFFFFF), no gradient, no props, no surface texture.
+- Portrait composition ({aspect}). Product centred and FULLY visible with generous margin on all sides — nothing cropped.
+- If the product is a pair or set (e.g. two earrings, two hair clips), show every piece, arranged neatly side by side.
+- Soft, even studio lighting that reveals true colours; realistic, subtle contact shadow only.
+- Sharp focus across the entire product.
+- No human, no hands, no text, no logo, no watermark, no packaging, no display card.

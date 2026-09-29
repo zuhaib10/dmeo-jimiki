@@ -1,0 +1,20 @@
+version: 2026-09-29.2
+---
+Create a premium editorial ecommerce photograph of a model wearing the EXACT jewellery product shown in the PRODUCT photographs.
+
+Input images: the first {product_image_count} image(s) are PRODUCT photographs — these are the only source of truth for the jewellery. The remaining {reference_image_count} image(s) are MODEL REFERENCE photographs — use them ONLY for the model's appearance, styling, pose, framing, lighting and photographic direction. Ignore and do NOT copy any jewellery, accessories or logos visible in the reference photographs.
+
+The product photographs show the item mounted on a JIMIKI retail display card (white card with the JIMIKI logo, 'Shop at jimiki.in' text, hang hole) and sometimes resting on a stone prop. The card, its printing, stitching/ties that hold the product to the card, and all props are NOT part of the product — never show them.
+
+THE PRODUCT MUST NOT CHANGE: same design, shape, proportions, colours, metal finish, stones and their arrangement/count, pearls/beads, hanging elements and every component. Do not redesign, recolour, reshape, beautify, simplify, replace or reinterpret it. Do not add or remove stones or components.
+
+Product: {product_type}
+Visible details to preserve: {details}
+Integrity requirements: {integrity_notes}
+Placement: {placement}
+
+Photography requirements:
+- Portrait composition ({aspect}), tasteful luxury fashion editorial look, natural skin texture.
+- The product must be clearly visible, in sharp focus and a prominent part of the frame; keep it within the central area of the frame, not near the edges.
+- The model wears ONLY this product — no other earrings, necklaces, rings, bangles, nose pins or other jewellery.
+- No text, no logo, no watermark.

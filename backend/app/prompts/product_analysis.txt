@@ -1,0 +1,18 @@
+version: 2026-09-29.2
+---
+Analyse the JIMIKI fashion-jewellery product shown in these photographs. All photographs show the same single product (a pair of earrings or a set of hair clips on one card counts as one product).
+
+The product is usually mounted on a JIMIKI retail display card (white card, JIMIKI logo, 'Shop at jimiki.in') and may rest on a stone prop. The card, its printing and props are NOT part of the product — describe only the product itself. Note how many pieces are in the set (e.g. 2 hair clips).
+
+Report ONLY facts that are visible. Never guess precious materials: say "gold-tone", "silver-tone", "red stones", "pearl-like beads" instead of gold, silver, ruby or pearl unless it is unambiguous. Ignore the background, hands, props and packaging.
+
+Fill every field:
+- category / product_type: e.g. earrings / jhumka earrings, necklace / lariat necklace, bracelet / chain bracelet, hair accessory / hair clips, hair accessory / scrunchie hair ties.
+- dominant_colour: the most important colour of the jewellery itself.
+- metal_appearance: visible finish (gold-tone, silver-tone, rose-gold-tone, oxidised, antique-gold-tone).
+- stones: colour, cut/shape and arrangement of visible stones, or "none visible".
+- design_features: shape of body, motifs, hanging elements, closure type if visible.
+- component_inventory: countable elements that must not change (e.g. "7 hanging pearl drops per earring", "3 floral tiers").
+- integrity_notes: short imperatives for an image generator, e.g. "Preserve exact stone arrangement", "Preserve all hanging elements".
+- name_colour / name_feature / name_type: words for a concise product name following [colour]-[feature]-[type], e.g. red / stone-pearl / jhumka. Leave name_colour or name_feature empty when uncertain. No marketing adjectives.
+- uncertainties: anything you could not verify.
